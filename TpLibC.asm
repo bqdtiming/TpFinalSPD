@@ -3,25 +3,19 @@
 .stack 100h
 
 .data
-	numeroReg 		db 0
-	binario_en_reg 		db 0b
-	multiplicador 		db 100, 10, 1
-	divisor 		db 100, 10, 1
 	salto 			db 0dh, 0ah, 24h
-	salidaError 		db 'Lo ingresado no es un número hexadecimal', 0dh, 0ah, 24h
 	EseNo   		db "Pedro, te dijimos si o no", 0dh, 0ah, 24h
 	seguro 			db "Ahora, listo?", 0dh, 0ah, 24h
 	cartel 			db  "S (si) / N (no)", 0ah, 0dh, 24h
 	saltito 			db 0dh, 0ah, 24h
 	pregunta1		db "Es una mujer?",0dh,0ah,24h
-	personajes		db "1","2","3",0dh,0ah,24h
+	personajes		db '0',"1","2","3",0dh,0ah,24h
 	pregunta2 		db "Es argentino?",0dh,0ah,24h
 	pregunta3 		db "Es actor?",0dh,0ah,24h
 	textoFinal		db "Tu personaje es el numero: ",0dh,0ah
 	personajeAscii	db "000",0dh,0ah,24h
 	textoError		db "No pudimos encontrar tu personaje :(",0dh,0ah,24h
 
-	
 .code
 
 public regToAscii
@@ -46,6 +40,7 @@ public respuestas
         push ax
         push dx
 
+        xor dh,dh
 		add bx,2
 		xor ax,ax
 		mov al, dl
@@ -132,7 +127,8 @@ cargaEspecial proc
 	respuestas endp
 
 	preguntar1 proc
-
+		mov al, 0
+		mov personajes[0],0
 		mov dx, offset pregunta1
 		call impresion
 
@@ -144,13 +140,13 @@ cargaEspecial proc
 
 		esMujer:
 			mov al, 0
-			mov personajes[0],al 
 			mov personajes[1],al 
+			mov personajes[2],al 
 			jmp finPreguntar1
 
 		noEsMujer:
 			mov al, 0
-			mov personajes[2],al
+			mov personajes[3],al
 			jmp finPreguntar1
 
 		finPreguntar1:
@@ -171,13 +167,13 @@ cargaEspecial proc
 
 		esArgentino:
 			mov al, 0
-			mov personajes[0],al 
-			mov personajes[2],al 
+			mov personajes[1],al 
+			mov personajes[3],al 
 			jmp finPreguntar2
 
 		noEsArgentino:
 			mov al, 0
-			mov personajes[1],al
+			mov personajes[2],al
 			jmp finPreguntar2
 			 
 		finPreguntar2:
@@ -186,8 +182,6 @@ cargaEspecial proc
 	preguntar2 endp
 
 	preguntar3 proc
-		pop ax
-		pop dx
 
 		mov dx, offset pregunta3
 		call impresion
@@ -200,8 +194,8 @@ cargaEspecial proc
 
 		esActor:
 			mov al, 0
-			mov personajes[1],al
-			mov personajes[2],al 
+			mov personajes[2],al
+			mov personajes[3],al 
 			jmp finPreguntar3
 
 		noEsActor:
@@ -218,7 +212,7 @@ cargaEspecial proc
 		mov si,0
 
 		compara:
-			cmp si, 3
+			cmp si, 4
 			je finalError
 			cmp personajes[si],0 
 			jne final 
@@ -227,12 +221,12 @@ cargaEspecial proc
 
 		final:
 			mov bx, offset personajeAscii
-			mov dl, byte ptr[si]
+			mov dx, si
 			call regtoascii
 
 			mov dx, offset textoFinal
 			call impresion
-			
+
 			jmp finProceso
 
 		finalError:
